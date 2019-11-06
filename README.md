@@ -2,10 +2,10 @@
 
 ---
 
-### Evaluating the robustness of learned control policies for robotic tasks difficult:
+### Evaluating the robustness of learned control policies for robotic tasks:
 
 The agent is designed according to the standard robotics paradigm Sense-Plan-Act. In this project the Sense and Act
-modules are utilized for assessing the planner's robustness against noise and domain shift in its observations and
+modules are utilized for assessing the planner's robustness against noise and domain shift in observations as well as
 during the execution of actions.
 
 ---
