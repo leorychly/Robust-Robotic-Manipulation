@@ -14,14 +14,21 @@ during the execution of actions.
 
 Requirements:
 - Python 3.6+
-- `pip3 install -r requirements.txt`
+- [PyBullet Gymperium](https://github.com/benelot/pybullet-gym)
 
 To install all requirements a virtual python environment is recommended which can be installed using the command:
-
 ```bash install.sh```.
 
-To run an experiment use the following command inside the virtual environment:
+Install PyBullet:
 
+```
+cd ./src/environments/
+git clone https://github.com/benelot/pybullet-gym.git
+cd pybullet-gym
+pip install -e .
+```
+
+To run an experiment use the following command inside the virtual environment:
 ```python train.py```
 
 ---
