@@ -16,11 +16,11 @@ Requirements:
 - Python 3.6+
 - `pip3 install -r requirements.txt`
 
-To install all requirements a virtual python environment is recommended and can be installed using the command:
+To install all requirements a virtual python environment is recommended which can be installed using the command:
 
 ```bash install.sh```.
 
-To train an experiment use the following command inside the virtual environment:
+To run an experiment use the following command inside the virtual environment:
 
 ```python train.py```
 
