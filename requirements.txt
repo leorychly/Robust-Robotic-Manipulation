@@ -1,0 +1,7 @@
+matplotlib
+numpy
+scipy
+gym
+tf-agents-nightly
+tfp-nightly
+tensorflow==2.0.0-rc0
