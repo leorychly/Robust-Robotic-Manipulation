@@ -14,7 +14,7 @@ during the execution of actions.
 
 Requirements:
 - Python 3.6+
-- [PyBullet Gymperium](https://github.com/benelot/pybullet-gym)
+- [PyBullet Gymperium](https://github.com/benelot/pybullet-gym), an open-source implementation of the OpenAI Gym MuJoCo
 
 To install all requirements a virtual python environment is recommended which can be installed using the command:
 ```bash install.sh```.
