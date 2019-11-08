@@ -13,23 +13,27 @@ during the execution of actions.
 ### Run the experiments:
 
 Requirements:
-- Python 3.6+
-- [PyBullet Gymperium](https://github.com/benelot/pybullet-gym), an open-source implementation of the OpenAI Gym MuJoCo
+* Python 3.6+
+* PyTorch 1.0+
+* [PyBullet Gymperium](https://github.com/benelot/pybullet-gym), an open-source implementation of the OpenAI Gym MuJoCo
 
-To install all requirements a virtual python environment is recommended which can be installed using the command:
-```bash install.sh```.
+Installation:
+* Create a virtual python environment and install  all requirements with: `bash install.sh`
+(The requirements can also be installed separately with `pip3 install -r requirements.txt`)
+* To install PyBullet run `bash install_pybulletgym.sh`. This will activate the venv, clone pybulletgym and install it.
 
-Install PyBullet:
+Experiments for a particular environment can be run using:
 
 ```
-cd ./src/environments/
-git clone https://github.com/benelot/pybullet-gym.git
-cd pybullet-gym
-pip install -e .
+python train.py
+-e    --environment   to choose one of the pybulletgym environments. Default is "InvertedDoublePendulumMuJoCoEnv-v0"
+-a    --agent               to choose which agent to run.
+-t    --train                  if set to True, the agent is also trained before evaluation.
+-exe  --executor       select an execution model. By default the BaseExecutor is used which executes the action given from the agent without modification.
+-obs  --observer       select an observer model. By default the baseObserver is used which passes the environment state as is to the agent.
+-l    --logging             select logging level. "info" for  basic output; "debug" for debugging purposes.
+-s    --seed                 set the random seed that will ne used for numpy and PyTorch.
 ```
-
-To run an experiment use the following command inside the virtual environment:
-```python train.py```
 
 ---
 
