@@ -39,3 +39,13 @@ python train.py
 
 ### Project Overview
 #### Agents
+* __TD3__: (successor of DDPG) a state of the art model-free reinforcement learning algorithm for continuous control problems.
+ The TD3 focuses on reducing the overestimation bias seen from the DDPG and similar algorithms by:
+    * Using a pair of critic networks
+    * Delayed updates of the actor
+    * Action noise regularisation
+    
+  As a result the TD3 training should be more stable and less reliant on finding the correct hyper parameters for the current task,
+  because it does not continuously over estimates the Q values of the critic (value) network. 
+  Otherwise, these estimation errors build up over time and can lead to the agent falling into a local optima 
+  or experience catastrophic forgetting. 
