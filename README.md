@@ -25,7 +25,8 @@ Installation:
 Experiments for a particular environment can be run using:
 
 ```
-python train.py
+python ./experiments/run.py
+
 -e    --environment   to choose one of the pybulletgym environments. Default is "InvertedDoublePendulumMuJoCoEnv-v0"
 -a    --agent         to choose which agent to run.
 -t    --train         if set to True, the agent is also trained before evaluation.
