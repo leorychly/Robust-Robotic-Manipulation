@@ -18,6 +18,8 @@ class TD3Agent(BaseAgent):
   def __init__(
     self,
     env,
+    observer=None,
+    executer=None,
     discount=0.99,
     tau=0.005,
     policy_noise=0.2,
@@ -29,7 +31,9 @@ class TD3Agent(BaseAgent):
     policy_noise = policy_noise * max_action
     noise_clip = noise_clip * max_action
 
-    super(TD3Agent, self).__init__(action_space=action_dim)
+    super(TD3Agent, self).__init__(action_space=action_dim,
+                                   observer=None,
+                                   executer=None)
 
     self.actor = Actor(state_dim, action_dim, max_action).to(device)
     self.actor_target = copy.deepcopy(self.actor)
@@ -60,7 +64,8 @@ class TD3Agent(BaseAgent):
     control_action = self.executer(action)
     return control_action
 
-  def _eval_policy_on_env(self, eval_gym_env, eval_episodes=10):
+  def eval_policy_on_env(self, eval_gym_env, eval_episodes=10):
+    """Uses the observer and executer."""
     # eval_gym_env.seed(seed + 100)
     avg_reward = 0.
     for _ in range(eval_episodes):
@@ -90,7 +95,7 @@ class TD3Agent(BaseAgent):
     results_path.mkdir(parents=True, exist_ok=True)
 
     # Evaluate untrained policy
-    self.evaluations.append(self._eval_policy_on_env(eval_gym_env=env,
+    self.evaluations.append(self.eval_policy_on_env(eval_gym_env=env,
                                             eval_episodes=eval_steps))
 
     state, done = env.reset(), False
@@ -144,7 +149,7 @@ class TD3Agent(BaseAgent):
 
       # Evaluate and safe episode
       if t % eval_freq == 0:
-        avg_reward = self._eval_policy_on_env(env, eval_episodes=eval_steps)
+        avg_reward = self.eval_policy_on_env(env, eval_episodes=eval_steps)
 
         logging.info(f"After Iteration {t}, "
                      f"Evaluation over {eval_steps} episodes, "

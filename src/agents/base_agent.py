@@ -78,6 +78,8 @@ class RandomAgent(BaseAgent):
                observer=None,
                executer=None):
     super(RandomAgent, self).__init__(action_space=action_space)
+    self.observer = observer
+    self.executer = executer
 
   def plan(self, obs=None):
     action = self.action_space.sample()
