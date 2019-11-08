@@ -27,12 +27,12 @@ Experiments for a particular environment can be run using:
 ```
 python train.py
 -e    --environment   to choose one of the pybulletgym environments. Default is "InvertedDoublePendulumMuJoCoEnv-v0"
--a    --agent               to choose which agent to run.
--t    --train                  if set to True, the agent is also trained before evaluation.
--exe  --executor       select an execution model. By default the BaseExecutor is used which executes the action given from the agent without modification.
--obs  --observer       select an observer model. By default the baseObserver is used which passes the environment state as is to the agent.
--l    --logging             select logging level. "info" for  basic output; "debug" for debugging purposes.
--s    --seed                 set the random seed that will ne used for numpy and PyTorch.
+-a    --agent         to choose which agent to run.
+-t    --train         if set to True, the agent is also trained before evaluation.
+-exe  --executor      select an execution model. By default the BaseExecutor is used which executes the action given from the agent without modification.
+-obs  --observer      select an observer model. By default the baseObserver is used which passes the environment state as is to the agent.
+-l    --logging       select logging level. "info" for  basic output; "debug" for debugging purposes.
+-s    --seed          set the random seed that will ne used for numpy and PyTorch.
 ```
 
 ---
