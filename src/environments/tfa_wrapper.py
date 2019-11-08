@@ -1,25 +1,23 @@
-# Copyright (c) 2019 Leonard Rychly, Patrick Hart
-#
-# This software is released under the MIT License.
-# https://opensource.org/licenses/MIT
-
 import numpy as np
 import tensorflow as tf
 from tf_agents.environments import py_environment
 from tf_agents.specs import array_spec
 from tf_agents.trajectories import time_step as ts
-from src.commons import BoundedSpace
+from src.commons import BoundedSpaceContinuous
 
 
-class TFADroneRace(py_environment.PyEnvironment):
+class TFAWrapper(py_environment.PyEnvironment):
   """Wrapper for TensorFlow Agents (https://github.com/tensorflow/agents)
 
   Arguments:
     py_environment -- Base class for environment from tf_agents
   """
 
-  def __init__(self, env):
+  def __init__(self, env, observer, executor):
+    super(TFAWrapper, self).__init__()
     self.env = env
+    self.observer = observer
+    self.executor = executor
     self._action_spec = array_spec.BoundedArraySpec(
         shape=self.env.action_space.shape,
         dtype=self.env.action_space.dtype,
@@ -42,17 +40,30 @@ class TFADroneRace(py_environment.PyEnvironment):
   def observation_spec(self):
     return self._observation_spec
 
+  def _apply_observer(self, time_step):
+    #time_step.observation = self.observer(time_step.observation)
+    return time_step
+
+  def _apply_executor(self, action):
+    control = self.executor(action)
+    return control
+
   def _reset(self):
     self._state = self.env.reset()
     self._episode_ended = False
-    return ts.restart(self._state)
+    time_step = ts.restart(self._state)
+    time_step = self._apply_observer(time_step)
+    return time_step
 
   def _step(self, action):
+    action = self._apply_executor(action)
     if self._episode_ended:
       return self.reset()
     state, action, reward, self._episode_ended = self.env.step(action)
     self._state = state
     if self._episode_ended:
-      return ts.termination(self._state, reward=reward)
+      time_step = ts.termination(self._state, reward=reward)
     else:
-      return ts.transition(self._state, reward=reward, discount=0.9)
+      time_step = ts.transition(self._state, reward=reward, discount=0.9)
+    time_step = self._apply_observer(time_step)
+    return time_step
