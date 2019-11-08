@@ -1,8 +1,9 @@
-# Uses the code of https://github.com/sfujim/TD3/blob/master/TD3.py
+# This implementation is based on the code of Fujimoto, Scott and Hoof, Herke and Meger, David
+# "Addressing Function Approximation Error in Actor-Critic Methods", ICML 2018
+# https://github.com/sfujim/TD3/blob/master/TD3.py
 
 import copy
 import numpy as np
-from pathlib2 import Path
 import matplotlib.pyplot as plt
 from absl import logging
 import torch
@@ -10,7 +11,7 @@ import torch.nn.functional as F
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 from src.agents.base_agent import BaseAgent
-from src.agents.td3_utils import Actor, Critic, ReplayBuffer
+from src.agents.td3.td3_utils import Actor, Critic, ReplayBuffer
 
 
 class TD3Agent(BaseAgent):
