@@ -1,4 +1,4 @@
-# Learning and Robust Control for Robotic Tasks
+# Robust Learning and Control for Robotic Tasks
 
 ---
 
