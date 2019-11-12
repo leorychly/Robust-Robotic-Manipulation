@@ -24,18 +24,21 @@ def create_nn_layer(layer_def):
 
 
 class Actor(nn.Module):
-  def __init__(self, state_dim, action_dim, max_action):
+  def __init__(self, state_dim, action_dim, max_action, actor_layer):
     super(Actor, self).__init__()
 
-    #self.layer = [state_dim, 256, 256, action_dim]
-    self.layer_param = [
-      {"type": "linear", "n_neurons": [state_dim, 256]},
-      {"type": "relu"},
-      {"type": "linear", "n_neurons": [256, 256]},
-      {"type": "relu"},
-      {"type": "linear", "n_neurons": [256, action_dim]},
-      {"type": "tanh"}
-    ]
+    actor_layer[0]["n_neurons"][0] = state_dim
+    actor_layer[-2]["n_neurons"][1] = action_dim
+    self.layer_param = actor_layer
+
+    #self.layer_param = [
+    #  {"type": "linear", "n_neurons": [state_dim, 256]},
+    #  {"type": "relu"},
+    #  {"type": "linear", "n_neurons": [256, 256]},
+    #  {"type": "relu"},
+    #  {"type": "linear", "n_neurons": [256, action_dim]},
+    #  {"type": "tanh"}
+    #]
     self.module_list = nn.ModuleList()
     for layer_def in self.layer_param:
       layer = create_nn_layer(layer_def)
@@ -57,16 +60,12 @@ class Actor(nn.Module):
 
 
 class Critic(nn.Module):
-  def __init__(self, state_dim, action_dim):
+  def __init__(self, state_dim, action_dim, critic_layer):
     super(Critic, self).__init__()
 
-    self.layer_param = [
-      {"type": "linear", "n_neurons": [state_dim + action_dim, 256]},
-      {"type": "relu"},
-      {"type": "linear", "n_neurons": [256, 256]},
-      {"type": "relu"},
-      {"type": "linear", "n_neurons": [256, 1]},
-    ]
+    critic_layer[0]["n_neurons"][0] = state_dim + action_dim
+    self.layer_param = critic_layer
+
     # Q1 architecture
     self.module_list_q1 = nn.ModuleList()
     for layer_def in self.layer_param:

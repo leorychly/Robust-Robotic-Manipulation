@@ -21,6 +21,10 @@ class TD3Agent(BaseAgent):
     self,
     env,
     action_limits,
+    actor_layer,
+    critic_layer,
+    actor_lr=3e-4,
+    critic_lr=3e-4,
     observer=None,
     executer=None,
     buffer_size=10000,
@@ -40,13 +44,13 @@ class TD3Agent(BaseAgent):
                                    observer=observer,
                                    executer=executer)
 
-    self.actor = Actor(state_dim, action_dim, max_action).to(device)
+    self.actor = Actor(state_dim, action_dim, max_action, actor_layer).to(device)
     self.actor_target = copy.deepcopy(self.actor)
-    self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), lr=3e-4)
+    self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), lr=actor_lr)
 
-    self.critic = Critic(state_dim, action_dim).to(device)
+    self.critic = Critic(state_dim, action_dim, critic_layer).to(device)
     self.critic_target = copy.deepcopy(self.critic)
-    self.critic_optimizer = torch.optim.Adam(self.critic.parameters(), lr=3e-4)
+    self.critic_optimizer = torch.optim.Adam(self.critic.parameters(), lr=critic_lr)
 
     self.replay_buffer = ReplayBuffer(state_dim, action_dim, max_size=buffer_size)
 

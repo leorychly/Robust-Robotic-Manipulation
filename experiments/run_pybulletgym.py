@@ -10,7 +10,8 @@ import numpy as np
 import argparse
 from absl import logging
 
-sys.path.insert(1, "..")
+#sys.path.insert(1, "..")
+from src.utils import read_config
 from src.agents.base_agent import RandomAgent
 from src.agents.td3.td3_agent import TD3Agent
 from src.observer.base_observer import BaseObserver
@@ -18,7 +19,7 @@ from src.executer.base_executer import BaseExecuter
 from src.executer.normal_noise_executer import NormalNoiseExecuter
 
 
-def run_td3_pytorch(args, env):
+def run_td3(env, args, config):
   """Test and/or evaluate the TD3 RL algorithm."""
   model_path = Path(args.directory) / "models"
   model_path.mkdir(parents=True, exist_ok=True)
@@ -30,18 +31,22 @@ def run_td3_pytorch(args, env):
   action_limits = np.array([env.action_space.low, env.action_space.high]).T
   agent = TD3Agent(env=env,
                    action_limits=action_limits,
-                   observer=eval(args.observer)(),
-                   executer=eval(args.executor)(action_limits=action_limits),
-                   buffer_size=1000000)  #  NormalNoiseExecuter(action_limits=action_limits)
+                   actor_layer=config["actor_layer"],
+                   critic_layer=config["critic_layer"],
+                   actor_lr=config["actor_lr"],
+                   critic_lr=config["critic_lr"],
+                   observer=eval(config["observer"])(),
+                   executer=eval(config["executer"])(action_limits=action_limits),
+                   buffer_size=config["buffer_size"])  #  NormalNoiseExecuter(action_limits=action_limits)
 
   if args.train:
     print("\n========== START TRAINING ==========")
     exp_param = vars(args)
-    exp_param["train_steps"] = 1000000
-    exp_param["initial_steps"] = 10000
-    exp_param["batch_size"] = 128
-    exp_param["eval_steps"] = 10
-    with open(str(Path(args.directory) / param_path / "experiment_param.json"), 'w') as jsn:
+    exp_param["train_steps"] = config["train_steps"]
+    exp_param["initial_steps"] = config["initial_steps"]
+    exp_param["batch_size"] = config["batch_size"]
+    exp_param["eval_steps"] = config["eval_steps"]
+    with open(str(param_path / "experiment_param.json"), 'w') as jsn:
       json.dump({
         "experiment_param": exp_param,
         "agent_param": agent.get_param()
@@ -53,7 +58,7 @@ def run_td3_pytorch(args, env):
     except Exception as e:
       logging.info(f"No model loaded from '{model_path}'")
     agent.train(env=env,
-                seed=args.seed,
+                seed=config["seed"],
                 train_steps=exp_param["train_steps"],
                 initial_steps=exp_param["initial_steps"],
                 model_save_path=model_path,
@@ -119,50 +124,41 @@ def run_random_agent(args, env):
 
 
 def main(args):
-  env = gym.make(args.environment)
+  config = read_config(args.config_file)
+  # Set seeds
+  torch.manual_seed(config["seed"])
+  np.random.seed(config["seed"])
 
-  if args.agent == "RandomAgent":
+  # Create Environment
+  env = gym.make(config["environment"])
+
+  # Random Agent
+  if config["agent"] == "RandomAgent":
     run_random_agent(args, env)
 
-  elif args.agent == "TD3":
-    run_td3_pytorch(args, env)
+  # TD3 Agent
+  elif config["agent"] == "TD3":
+    run_td3(env, args, config)
 
 
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(description="Run a Robotic manipulation Task.")
-  parser.add_argument("-e", "--environment",
-                      help="Any environments from PyBullet Gymperium.",
-                      default="InvertedDoublePendulumMuJoCoEnv-v0", type=str)
-  parser.add_argument("-a", "--agent",
-                      help="Choose which agent to use for the experiment. ('RandomAgent', 'TD3')",
-                      default="TD3", type=str)
-  parser.add_argument("-exe", "--executor",
-                      help="Choose which executor to use for the experiment.",
-                      default="BaseExecuter", type=str)
-  parser.add_argument("-obs", "--observer",
-                      help="Choose which observer to use for the experiment.",
-                      default="BaseObserver", type=str)
   parser.add_argument("-t", "--train",
                       help="If set to 'True' the agent is also trained before evaluation.",
                       default=False, type=str)
   parser.add_argument("-l", "--logging",
                       help="Set logging verbosity: 'debug': print all; 'info': print info only",
                       default="info", type=str)
-  parser.add_argument("-s", "--seed",
-                      help="Random Seed",
-                      default=int(time.time()), type=np.int)
+  parser.add_argument("-c", "--config_file",
+                      help="Path or file to experiment config file(s). E.g '/Robust-Robotic-Manipulation/experiments/configs'",
+                      default=f"{Path(os.getcwd()) / 'experiments/configs/exp01.json'}")
   parser.add_argument("-d", "--directory",
                       help="The experiment output directory. E.g.: ./experiment_results",
-                      default=f"{Path(os.getcwd()) / 'experiment_results/td3_7'}",
+                      default=f"{Path(os.getcwd()) / 'experiment_results/td3_10'}",
                       type=str)
 
-
   args = parser.parse_args()
-
-  # Set seeds
-  torch.manual_seed(args.seed)
-  np.random.seed(args.seed)
 
   if args.logging is "debug":
     logging.set_verbosity(logging.DEBUG)
