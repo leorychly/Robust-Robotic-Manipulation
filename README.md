@@ -22,10 +22,10 @@ Installation:
 (The requirements can also be installed separately with `pip3 install -r requirements.txt`)
 * To install PyBullet run `bash install_pybulletgym.sh`. This will activate the venv, clone pybulletgym and install it.
 
-Experiments for a particular environment can be run using:
+Experiments for a particular environment can be run using the following command and a config file (`./experiments/configs/exp01.json`) where the experiment paramters are defined.
 
 ```
-python ./experiments/run.py
+bash run_experiment_train.sh
 
 -e    --environment   to choose one of the pybulletgym environments. Default is "InvertedDoublePendulumMuJoCoEnv-v0"
 -a    --agent         to choose which agent to run.
