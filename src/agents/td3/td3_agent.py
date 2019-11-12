@@ -7,6 +7,7 @@ import copy
 import numpy as np
 import matplotlib.pyplot as plt
 from absl import logging
+from gym import wrappers
 import torch
 import torch.nn.functional as F
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -72,7 +73,7 @@ class TD3Agent(BaseAgent):
     """Uses the observer and executer."""
     eval_gym_env.seed(int(time.time()))
     avg_reward = 0.
-    for _ in range(eval_episodes):
+    for i in range(eval_episodes):
       state, done = eval_gym_env.reset(), False
       obs = self.observer(state)
       while not done:
@@ -99,8 +100,9 @@ class TD3Agent(BaseAgent):
     results_path.mkdir(parents=True, exist_ok=True)
 
     # Evaluate untrained policy
-    self.evaluations.append(self.eval_policy_on_env(eval_gym_env=env,
-                                            eval_episodes=eval_steps))
+    self.evaluations.append(self.eval_policy_on_env(
+      eval_gym_env=env,
+      eval_episodes=eval_steps))
 
     state, done = env.reset(), False
     obs = self.observer(state)
@@ -154,7 +156,6 @@ class TD3Agent(BaseAgent):
       # Evaluate and safe episode
       if t % eval_freq == 0:
         avg_reward = self.eval_policy_on_env(env, eval_episodes=eval_steps)
-
         logging.info(f"After Iteration {t}, "
                      f"Evaluation over {eval_steps} episodes, "
                      f"Average Reward: {avg_reward:.3f}")
@@ -163,6 +164,11 @@ class TD3Agent(BaseAgent):
         np.save((results_path/"results.npy").absolute().as_posix(), self.evaluations)
         self.save(model_save_path)
         self._plot_results(results_path)
+
+      #if t % eval_freq * 10 == 0:
+      #  self._save_as_gif(
+      #    env=env,
+      #    save_path=(results_path / f"videos/gif_epoch{t}").absolute().as_posix())
 
   def _optimize(self, batch_size):
     self.total_iter += 1
@@ -240,8 +246,23 @@ class TD3Agent(BaseAgent):
     ax.set(xlabel="Iterations [1k]", ylabel="Average Reward",
            title="Average Reward of Evaluation during Training")
     ax.grid()
-    fig.savefig((file_path / "test.png").absolute().as_posix())
+    fig.savefig((file_path / "training_reward.png").absolute().as_posix())
     plt.close()
+
+  def _save_as_gif(self, env, save_path, episodes=1000):
+    # TODO: does not work yet. ffmpeg bug...
+    env = wrappers.Monitor(env, save_path)
+    avg_reward = 0.
+    for i in range(episodes):
+      state, done = env.reset(), False
+      obs = self.observer(state)
+      while not done:
+        action = self.plan(np.array(obs))
+        state, reward, done, _ = env.step(action)
+        obs = self.observer(state)
+        avg_reward += reward
+    avg_reward /= episodes
+    return avg_reward
 
   def get_param(self):
     return {
@@ -253,6 +274,6 @@ class TD3Agent(BaseAgent):
       "noise_clip": self.noise_clip,
       "policy_freq": self.policy_freq,
       "buffer_size": self.replay_buffer.max_size,
-      "actor_layers": self.actor.layer,
-      "critic_layers": self.critic.layer
+      "actor_layer_param": self.actor.layer_param,  # TODO add layer_param froma ctior
+      "critic_layer_param": self.critic.layer_param
     }

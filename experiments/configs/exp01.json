@@ -1,0 +1,12 @@
+{
+  "seed": "42",
+  "observer": "BaseObserver",
+  "executer": "BaseExecuter",
+  "buffer_size": 1000000,
+  "train_steps": 1000000,
+  "initial_steps": 10000,
+  "batch_size": 128,
+  "eval_steps": 10,
+  "actor_hlayers": [256, 256],
+  "critic_hlayers": [256, 256]
+}

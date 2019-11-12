@@ -13,10 +13,10 @@ from absl import logging
 sys.path.insert(1, "..")
 from src.agents.base_agent import RandomAgent
 from src.agents.td3.td3_agent import TD3Agent
+from src.observer.base_observer import BaseObserver
+from src.executer.base_executer import BaseExecuter
 from src.executer.normal_noise_executer import NormalNoiseExecuter
 
-#TODO: agent funct that returns all self params,
-#TODO: save all kwargs + agent args to file
 
 def run_td3_pytorch(args, env):
   """Test and/or evaluate the TD3 RL algorithm."""
@@ -30,17 +30,22 @@ def run_td3_pytorch(args, env):
   action_limits = np.array([env.action_space.low, env.action_space.high]).T
   agent = TD3Agent(env=env,
                    action_limits=action_limits,
-                   observer=None,
-                   executer=None,
-                   buffer_size=10000)  #  NormalNoiseExecuter(action_limits=action_limits)
+                   observer=eval(args.observer)(),
+                   executer=eval(args.executor)(action_limits=action_limits),
+                   buffer_size=1000000)  #  NormalNoiseExecuter(action_limits=action_limits)
 
   if args.train:
     print("\n========== START TRAINING ==========")
     exp_param = vars(args)
     exp_param["train_steps"] = 1000000
     exp_param["initial_steps"] = 10000
-    exp_param["batch_size"] = 64
+    exp_param["batch_size"] = 128
     exp_param["eval_steps"] = 10
+    with open(str(Path(args.directory) / param_path / "experiment_param.json"), 'w') as jsn:
+      json.dump({
+        "experiment_param": exp_param,
+        "agent_param": agent.get_param()
+      }, jsn)
 
     try:
       agent.load(model_path)
@@ -56,14 +61,6 @@ def run_td3_pytorch(args, env):
                 batch_size=exp_param["batch_size"],
                 eval_steps=exp_param["eval_steps"],
                 eval_freq=1000)
-    with open(str(Path(args.directory) / param_path / "experiment_param.json"), 'w') as jsn:
-      json.dump({
-        "experiment_param": exp_param,
-        "agent_param": agent.get_param()
-      }, jsn)
-
-    #json.dump(agent.__dict__, str(Path(args.directory) / "params/model_param.json"))
-
 
   else:
     print("\n========== START EVALUATION ==========")
@@ -136,28 +133,30 @@ if __name__ == '__main__':
   parser = argparse.ArgumentParser(description="Run a Robotic manipulation Task.")
   parser.add_argument("-e", "--environment",
                       help="Any environments from PyBullet Gymperium.",
-                      default="InvertedDoublePendulumMuJoCoEnv-v0")
+                      default="InvertedDoublePendulumMuJoCoEnv-v0", type=str)
   parser.add_argument("-a", "--agent",
                       help="Choose which agent to use for the experiment. ('RandomAgent', 'TD3')",
-                      default="TD3")
+                      default="TD3", type=str)
   parser.add_argument("-exe", "--executor",
                       help="Choose which executor to use for the experiment.",
-                      default="BaseExecuter")
+                      default="BaseExecuter", type=str)
   parser.add_argument("-obs", "--observer",
                       help="Choose which observer to use for the experiment.",
-                      default="BaseObserver")
+                      default="BaseObserver", type=str)
   parser.add_argument("-t", "--train",
                       help="If set to 'True' the agent is also trained before evaluation.",
-                      default=False)
+                      default=False, type=str)
   parser.add_argument("-l", "--logging",
                       help="Set logging verbosity: 'debug': print all; 'info': print info only",
-                      default="info")
+                      default="info", type=str)
   parser.add_argument("-s", "--seed",
                       help="Random Seed",
                       default=int(time.time()), type=np.int)
   parser.add_argument("-d", "--directory",
                       help="The experiment output directory. E.g.: ./experiment_results",
-                      default=f"{Path(os.getcwd()) / 'experiment_results/td3'}")
+                      default=f"{Path(os.getcwd()) / 'experiment_results/td3_7'}",
+                      type=str)
+
 
   args = parser.parse_args()
 
