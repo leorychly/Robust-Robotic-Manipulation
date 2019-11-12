@@ -4,7 +4,6 @@ from os.path import isfile, isdir, join
 import json
 
 def read_config(config_path):
-  config_path = str(config_path.absolute())
   if isfile(config_path):
     with open(config_path) as jfile:
         data = json.load(jfile)
