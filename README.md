@@ -10,26 +10,33 @@ during the execution of actions.
 
 ---
 
-### Run the experiments:
+### How to start
 
 Requirements:
 * Python 3.6+
 * PyTorch 1.0+
 * [PyBullet Gymperium](https://github.com/benelot/pybullet-gym), an open-source implementation of the OpenAI Gym MuJoCo
 
-Installation:
-* Create a virtual python environment and install  all requirements with `bash install.sh`. This will also clone and install PyBullet in ./environments/pybulletgym.
+#### Installation:
+Create a virtual python environment and install  all requirements with `bash install.sh`. This will also clone and install PyBullet in ./environments/pybulletgym.
 (The requirements can alternatively be installed separately with `pip3 install -r requirements.txt`)
+
+### Run experiments
+
+There are three ways to run the agents:
+* __Train__ the agent on an environment.
+* __Evaluate__ the agent on the (same) environment.
+* __Test__ the agent's generalization capabilities on the (same) environment with different observers and executers.
 
 Experiments for a particular environment can be run using the following command and a config file (`./experiments/configs/exp01.json`) where the experiment paramters are defined.
 
 ```
 bash run_experiment_train.sh
 
--t    --train         If set to True, the agent is also trained before evaluation. (E.g. True)
--l    --logging       Select logging level. "info" for  basic output; "debug" for debugging purposes. (Eg. 'info')
--c    --config        Experiment config file. (E.g '/Robust-Robotic-Manipulation/experiments/configs/exp01.json')
--d    --directory     The experiment output directory. (E.g.: './experiment_results')
+-m    --mode          Set 'train', 'eval' or 'test' for training, evaluation, or testing generalization respectively
+-l    --logging       Select logging level. "info" for  basic output; "debug" for debugging purposes. (default 'info')
+-c    --config        Experiment config file. (E.g '/Robust-Robotic-Manipulation/experiments/configs/train_config.json')
+-d    --directory     The model and experiment output directory. (E.g.: './experiment_results')
 ```
 
 ---
@@ -46,3 +53,5 @@ bash run_experiment_train.sh
   because it does not continuously over estimates the Q values of the critic (value) network. 
   Otherwise, these estimation errors build up over time and can lead to the agent falling into a local optima 
   or experience catastrophic forgetting. 
+
+#### Observer and Executer
