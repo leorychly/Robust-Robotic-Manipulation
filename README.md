@@ -18,9 +18,8 @@ Requirements:
 * [PyBullet Gymperium](https://github.com/benelot/pybullet-gym), an open-source implementation of the OpenAI Gym MuJoCo
 
 Installation:
-* Create a virtual python environment and install  all requirements with: `bash install.sh`
+* Create a virtual python environment and install  all requirements with: `bash install.sh`. This will also clone and install PyBullet in ./environments/pybulletgym.
 (The requirements can also be installed separately with `pip3 install -r requirements.txt`)
-* To install PyBullet run `bash install_pybulletgym.sh`. This will activate the venv, clone pybulletgym and install it.
 
 Experiments for a particular environment can be run using the following command and a config file (`./experiments/configs/exp01.json`) where the experiment paramters are defined.
 
