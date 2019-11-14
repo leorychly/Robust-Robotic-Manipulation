@@ -4,7 +4,7 @@ import numpy as np
 class BaseExecuter(metaclass=ABCMeta):
   """This agent implements the Sense-Plan-Act architecture."""
 
-  def __init__(self, action_limits):
+  def __init__(self, action_space):
     """
     Initialize the action limits of the executer.
 
@@ -12,9 +12,7 @@ class BaseExecuter(metaclass=ABCMeta):
       The min and max values the actions can have in the form of:
       [[a1_min, a1_max], [a2_min, a2_max], [..], ..]
     """
-    if action_limits.ndim == 1:
-      action_limits = action_limits.reshape(1, -1)
-    self.action_limits=action_limits
+    self.action_space=action_space
 
   def __call__(self, action):
     """
@@ -31,8 +29,6 @@ class BaseExecuter(metaclass=ABCMeta):
     action = action.astype(np.float)
     if  hasattr(self, "_modify"):
       action = self._modify(action)
-    clipped_action = np.clip(action,
-                             a_min=self.action_limits[:, 0],
-                             a_max=self.action_limits[:, 1])
-    return clipped_action
+    action = np.clip(action, a_min=self.action_space.low, a_max=self.action_space.high)
+    return action
 
