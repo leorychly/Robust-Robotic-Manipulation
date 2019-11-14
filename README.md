@@ -21,12 +21,12 @@ Requirements:
 Create a virtual python environment and install  all requirements with `bash install.sh`. This will also clone and install PyBullet in ./environments/pybulletgym.
 (The requirements can alternatively be installed separately with `pip3 install -r requirements.txt`)
 
-### Run experiments
+#### Run experiments
 
 There are three ways to run the agents:
 * __Train__ the agent on an environment.
-* __Evaluate__ the agent on the (same) environment.
-* __Test__ the agent's generalization capabilities on the (same) environment with different observers and executers.
+* __Evaluate__ the agent on an environment.
+* __Test__ the agent's generalization capabilities on an environment with different observers and executers.
 
 Experiments for a particular environment can be run using the following command and a config file (`./experiments/configs/exp01.json`) where the experiment paramters are defined.
 
