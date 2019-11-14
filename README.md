@@ -10,9 +10,9 @@ during the execution of actions.
 
 ---
 
-### How to start
+### How to start:
 
-Requirements:
+#### Requirements
 * Python 3.6+
 * PyTorch 1.0+
 * [PyBullet Gymperium](https://github.com/benelot/pybullet-gym), an open-source implementation of the OpenAI Gym MuJoCo
