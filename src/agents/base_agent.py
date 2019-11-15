@@ -7,13 +7,13 @@ class BaseAgent(metaclass=ABCMeta):
   """This agent implements the Sense-Plan-Act architecture."""
 
   def __init__(self,
-               action_limits,
+               observation_space,
+               action_space,
                observer=None,
                executer=None):
     # TODO: add action_space and check if given action limits do not exceed the action_space
-    self.action_limits = action_limits
-    self.observer = observer or BaseObserver()
-    self.executer = executer or BaseExecuter(action_limits=action_limits)
+    self.observer = observer or BaseObserver(observation_space=observation_space)
+    self.executer = executer or BaseExecuter(action_space=action_space)
 
   def sense(self, state):
     """
@@ -75,12 +75,13 @@ class RandomAgent(BaseAgent):
   """This agent implements the Sense-Plan-Act architecture."""
 
   def __init__(self,
+               observation_space,
                action_space,
-               action_limits,
                observer=None,
                executer=None):
-    super(RandomAgent, self).__init__(action_limits=action_limits)
-    action_space = action_space
+    super(RandomAgent, self).__init__(observation_space=observation_space,
+                                      action_space=action_space)
+    self.action_space = action_space
     self.observer = observer
     self.executer = executer
 
