@@ -24,9 +24,9 @@
     {"type": "relu"},
     {"type": "linear", "n_neurons": [256, 1]}
   ],
-  "actor_lr": 5e-5,
-  "critic_lr": 5e-5,
-  "discount": 0,
+  "actor_lr": 8e-5,
+  "critic_lr": 8e-5,
+  "discount": 0.99,
   "tau": 0.005,
   "policy_noise": 0.2,
   "noise_clip": 0.5,

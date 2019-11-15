@@ -4,5 +4,6 @@
   "observer": "BaseObserver",
   "executer": "BaseExecuter",
   "environment": "InvertedDoublePendulumMuJoCoEnv-v0",
-  "eval_episodes": 1000
+  "eval_episodes": 10,
+  "render_steps": 1000
 }
