@@ -55,3 +55,7 @@ bash run_experiment_train.sh
   or experience catastrophic forgetting. 
 
 #### Observer and Executer
+The generalization capabilities of an agent are systematically evaluated, as described in the following schematic.
+Therefore, different observer and execution modules are available which can be activated and deactivated as needed.
+* Observer
+* Executer
