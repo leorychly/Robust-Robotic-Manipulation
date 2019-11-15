@@ -11,6 +11,7 @@ from gym import wrappers
 import torch
 import torch.nn.functional as F
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"\nRunning computation on: '{device}'\n")
 
 from src.agents.base_agent import BaseAgent
 from src.agents.td3.td3_utils import Actor, Critic, ReplayBuffer
@@ -20,35 +21,38 @@ class TD3Agent(BaseAgent):
   def __init__(
     self,
     env,
-    action_limits,
     actor_layer,
     critic_layer,
-    actor_lr=3e-4,
-    critic_lr=3e-4,
-    observer=None,
-    executer=None,
-    buffer_size=10000,
-    discount=0.99,
-    tau=0.005,
-    policy_noise=0.2,
-    noise_clip=0.5,
-    policy_freq=2):
+    actor_lr,  # =3e-4,
+    critic_lr,  # =3e-4,
+    observer,  # =None,
+    executer,  # =None,
+    buffer_size,  # =10000,
+    discount,  # =0.99,
+    tau,  # =0.005,
+    policy_noise,  # =0.2,
+    noise_clip,  # =0.5,
+    policy_freq,
+    **unused_kwargs):  # =2):
+
     state_dim = env.observation_space.shape[0]
     action_dim = env.action_space.shape[0]
     max_action = float(env.action_space.high[0])
     policy_noise = policy_noise * max_action
     noise_clip = noise_clip * max_action
-    assert np.all(action_limits[:, 0] < action_limits[:, 1])
 
-    super(TD3Agent, self).__init__(action_limits=action_limits,
+    super(TD3Agent, self).__init__(observation_space=env.observation_space,
+                                   action_space=env.action_space,
                                    observer=observer,
                                    executer=executer)
 
-    self.actor = Actor(state_dim, action_dim, max_action, actor_layer).to(device)
+    self.actor = Actor(state_dim, action_dim, max_action, actor_layer)  # .to(device)
+    self.actor = self.actor.to(device)
     self.actor_target = copy.deepcopy(self.actor)
     self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), lr=actor_lr)
 
-    self.critic = Critic(state_dim, action_dim, critic_layer).to(device)
+    self.critic = Critic(state_dim, action_dim, critic_layer)  # .to(device)
+    self.critic = self.critic.to(device)
     self.critic_target = copy.deepcopy(self.critic)
     self.critic_optimizer = torch.optim.Adam(self.critic.parameters(), lr=critic_lr)
 
@@ -68,37 +72,43 @@ class TD3Agent(BaseAgent):
   # TODO: is selec_action == BaseAgent.plan? How to train?
 
   def plan(self, state):
-    state = torch.FloatTensor(state.reshape(1, -1)).to(device)
+    state = torch.FloatTensor(state.reshape(1, -1))  # .to(device)
+    state = state.to(device)
     action = self.actor(state).cpu().data.numpy().flatten()
     control_action = self.executer(action)
     return control_action
 
-  def eval_policy_on_env(self, eval_gym_env, eval_episodes=10):
+  def eval_policy_on_env(self, eval_gym_env, eval_episodes=10, seed=None):
     """Uses the observer and executer."""
-    eval_gym_env.seed(int(time.time()))
+    if not seed:
+      eval_gym_env.seed(seed)
+    else:
+      eval_gym_env.seed(int(time.time()))
     avg_reward = 0.
     for i in range(eval_episodes):
       state, done = eval_gym_env.reset(), False
       obs = self.observer(state)
+      step = 0
+      #while not done and step < max_steps:
       while not done:
         action = self.plan(np.array(obs))
         state, reward, done, _ = eval_gym_env.step(action)
         obs = self.observer(state)
         avg_reward += reward
+        step += 1
 
     avg_reward /= eval_episodes
     return avg_reward
 
   def train(self,
             env,
-            seed,
             train_steps,
             initial_steps,
             model_save_path,
             results_path,
-            expl_noise=0.1,
-            batch_size=100,
-            eval_steps=100,
+            expl_noise,  # =0.1,
+            batch_size,  # =100,
+            eval_steps,  # =100,
             eval_freq=1000):
     # Create directory for results
     results_path.mkdir(parents=True, exist_ok=True)
@@ -114,6 +124,7 @@ class TD3Agent(BaseAgent):
     episode_timesteps = 0
     episode_num = 0
 
+    t0 = time.time()
     for t in range(int(train_steps)):
 
       episode_timesteps += 1
@@ -162,7 +173,9 @@ class TD3Agent(BaseAgent):
         avg_reward = self.eval_policy_on_env(env, eval_episodes=eval_steps)
         logging.info(f"After Iteration {t}, "
                      f"Evaluation over {eval_steps} episodes, "
-                     f"Average Reward: {avg_reward:.3f}")
+                     f"Average Reward: {avg_reward:.3f}, "
+                     f"({time.time() - t0:.2f} sec)")
+        t0 = time.time()
 
         self.evaluations.append(avg_reward)
         np.save((results_path/"results.npy").absolute().as_posix(), self.evaluations)
