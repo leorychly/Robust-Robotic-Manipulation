@@ -56,6 +56,6 @@ bash run_experiment_train.sh
 
 #### Observer and Executer
 The generalization capabilities of an agent are systematically evaluated, as described in the following schematic.
-Therefore, different observer and execution modules are available which can be activated and deactivated as needed.
-* Observer
-* Executer
+![alt text](https://github.com/LeRyc/Robust-Robotic-Manipulation/blob/master/img/im1.png "Assessing Generalization of an Agent")
+Therefore, different observer and execution modules are available which can be activated and deactivated as needed. CUrrently, for both, the observer and the executer, a module for adding noise and for simulating domain shift are implemented and can be futher modified.
+![alt text](https://github.com/LeRyc/Robust-Robotic-Manipulation/blob/master/img/im3.png "Noise and Shift Observer")
