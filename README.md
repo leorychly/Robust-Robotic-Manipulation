@@ -63,4 +63,4 @@ Therefore, different observer and execution modules are available which can be a
 
 ![x](https://github.com/LeRyc/Robust-Robotic-Manipulation/blob/master/img/im3.png "Noise and Shift Observer")
 
-<img src="https://github.com/LeRyc/Robust-Robotic-Manipulation/blob/master/img/im3.png" height="24">
+<img src="https://github.com/LeRyc/Robust-Robotic-Manipulation/blob/master/img/im3.png" height="100" "Noise and Shift Observer">
