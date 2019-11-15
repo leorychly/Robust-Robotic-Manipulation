@@ -16,3 +16,20 @@ class BoundedSpaceDiscrete:
     self.shape = (dim,)
     self.n = dim
     self.dtype = dtype
+
+
+class Box:
+  """Definition of action and observation spaces in OpenAI Gym environments."""
+  def __init__(self,
+               bounded_above,
+               bounded_below,
+               dtype,
+               high,
+               low,
+               shape):
+    self.bounded_above = bounded_above
+    self.bounded_below = bounded_below
+    self.dtype = dtype
+    self.high = high
+    self.low = low
+    self.shape = shape
