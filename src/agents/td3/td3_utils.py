@@ -31,21 +31,10 @@ class Actor(nn.Module):
     actor_layer[-2]["n_neurons"][1] = action_dim
     self.layer_param = actor_layer
 
-    #self.layer_param = [
-    #  {"type": "linear", "n_neurons": [state_dim, 256]},
-    #  {"type": "relu"},
-    #  {"type": "linear", "n_neurons": [256, 256]},
-    #  {"type": "relu"},
-    #  {"type": "linear", "n_neurons": [256, action_dim]},
-    #  {"type": "tanh"}
-    #]
     self.module_list = nn.ModuleList()
     for layer_def in self.layer_param:
       layer = create_nn_layer(layer_def)
       self.module_list.append(layer)
-    #self.l1 = nn.Linear(self.layer[0], self.layer[1])
-    #self.l2 = nn.Linear(self.layer[1], self.layer[2])
-    #self.l3 = nn.Linear(self.layer[2], self.layer[3])
     self.max_action = max_action
 
   def forward(self, x):
@@ -53,10 +42,6 @@ class Actor(nn.Module):
       x = layer(x)
     x = x.clone() * self.max_action
     return x
-    #state = F.relu(self.l1(state))
-    #state = F.relu(self.l2(state))
-    #state = torch.tanh(self.l3(state)) * self.max_action
-    #return state
 
 
 class Critic(nn.Module):
@@ -79,17 +64,6 @@ class Critic(nn.Module):
 
     self.layer = [state_dim + action_dim, 256, 256, 1]
 
-    ## Q1 architecture
-    #self.l1 = nn.Linear(self.layer[0], self.layer[1])
-    #self.l2 = nn.Linear(self.layer[1], self.layer[2])
-    #self.l3 = nn.Linear(self.layer[2], self.layer[3])
-
-    ## Q2 architecture
-    #self.l5 = nn.Linear(self.layer[0], self.layer[1])
-    #self.l6 = nn.Linear(self.layer[1], self.layer[2])
-    #self.l7 = nn.Linear(self.layer[2], self.layer[3])
-
-
   def forward(self, state, action):
     x1 = torch.cat([state, action], 1)
     x2 = torch.cat([state, action], 1)
@@ -97,23 +71,12 @@ class Critic(nn.Module):
       x1 = layer1(x1)
       x2 = layer1(x2)
     return x1, x2
-    #x1 = F.relu(self.l1(sa))
-    #x1 = F.relu(self.l2(x1))
-    #x1 = self.l3(x1)
-    #x2 = F.relu(self.l5(sa))
-    #x2 = F.relu(self.l6(x2))
-    #x2 = self.l7(x2)
-    #return x1, x2
 
   def Q1(self, state, action):
     x = torch.cat([state, action], 1)
     for layer in self.module_list_q1:
       x = layer(x)
     return x
-    #q1 = F.relu(self.l1(sa))
-    #q1 = F.relu(self.l2(q1))
-    #q1 = self.l3(q1)
-    #return q1
 
 
 class ReplayBuffer(object):

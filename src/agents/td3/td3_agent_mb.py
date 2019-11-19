@@ -1,7 +1,3 @@
-# This implementation is based on the code of Fujimoto, Scott and Hoof, Herke and Meger, David
-# "Addressing Function Approximation Error in Actor-Critic Methods", ICML 2018
-# https://github.com/sfujim/TD3/blob/master/TD3.py
-
 import time
 import copy
 import numpy as np
@@ -15,25 +11,29 @@ print(f"\nRunning computation on: '{device}'\n")
 
 from src.agents.base_agent import BaseAgent
 from src.agents.td3.td3_utils import Actor, Critic, ReplayBuffer
+from src.agents.td3.ann import ANN
 
 
-class TD3Agent(BaseAgent):
+class TD3AgentMB(BaseAgent):
   def __init__(
     self,
     env,
     actor_layer,
     critic_layer,
-    actor_lr,  # =3e-4,
-    critic_lr,  # =3e-4,
-    observer,  # =None,
-    executer,  # =None,
-    buffer_size,  # =10000,
-    discount,  # =0.99,
-    tau,  # =0.005,
-    policy_noise,  # =0.2,
-    noise_clip,  # =0.5,
+    actor_lr,
+    critic_lr,
+    observer,
+    executer,
+    buffer_size,
+    discount,
+    tau,
+    policy_noise,
+    noise_clip,
     policy_freq,
-    **unused_kwargs):  # =2):
+    model_layer,
+    model_lr,
+    model_replay_buffer_size,
+    **unused_kwargs):
 
     state_dim = env.observation_space.shape[0]
     action_dim = env.action_space.shape[0]
@@ -41,10 +41,12 @@ class TD3Agent(BaseAgent):
     policy_noise = policy_noise * max_action
     noise_clip = noise_clip * max_action
 
-    super(TD3Agent, self).__init__(observation_space=env.observation_space,
+    super(TD3AgentMB, self).__init__(observation_space=env.observation_space,
                                    action_space=env.action_space,
                                    observer=observer,
                                    executer=executer)
+
+    self.replay_buffer = ReplayBuffer(state_dim, action_dim, max_size=buffer_size)
 
     self.actor = Actor(state_dim, action_dim, max_action, actor_layer)  # .to(device)
     self.actor = self.actor.to(device)
@@ -56,9 +58,12 @@ class TD3Agent(BaseAgent):
     self.critic_target = copy.deepcopy(self.critic)
     self.critic_optimizer = torch.optim.Adam(self.critic.parameters(), lr=critic_lr)
 
-    self.replay_buffer = ReplayBuffer(state_dim, action_dim, max_size=buffer_size)
-
-    self.env_model = None
+    self.env_model = ANN(state_dim=state_dim,
+                         action_dim=action_dim,
+                         model_layer=model_layer,
+                         model_replay_buffer_size=model_replay_buffer_size,
+                         lr=model_lr)
+    self.env_model = self.env_model.to(device)
 
     self.action_dim = action_dim
     self.max_action = max_action
@@ -108,9 +113,10 @@ class TD3Agent(BaseAgent):
             initial_steps,
             model_save_path,
             results_path,
-            expl_noise,  # =0.1,
-            batch_size,  # =100,
-            eval_steps,  # =100,
+            expl_noise,
+            batch_size,
+            eval_steps,
+            model_batch_size,
             eval_freq=1000):
     # Create directory for results
     results_path.mkdir(parents=True, exist_ok=True)
@@ -148,6 +154,7 @@ class TD3Agent(BaseAgent):
 
       # Store data in replay buffer
       self.replay_buffer.add(obs, action, next_obs, reward, done_bool)
+      self.env_model.add_to_buffer(in_val=np.concatenate((obs, action)), out_val=next_obs)
 
       obs = next_obs
       episode_reward += reward
@@ -155,6 +162,7 @@ class TD3Agent(BaseAgent):
       # Train agent after collecting data
       if t >= initial_steps:
         self._optimize(batch_size)
+        self.env_model.optimize_model(batch_size=model_batch_size)
 
       if done:
         # +1 to account for 0 indexing. +0 on ep_timesteps since it will increment +1 even if done=True
@@ -173,9 +181,12 @@ class TD3Agent(BaseAgent):
       # Evaluate and safe episode
       if t % eval_freq == 0:
         avg_reward = self.eval_policy_on_env(env, eval_episodes=eval_steps)
+        avrg_loss = self.env_model.eval()
+
         logging.info(f"After Iteration {t}, "
                      f"Evaluation over {eval_steps} episodes, "
-                     f"Average Reward: {avg_reward:.3f}, "
+                     f"Avrg Reward: {avg_reward:.3f}, "
+                     f"Avrg Model loss: {avrg_loss}, "
                      f"({time.time() - t0:.2f} sec)")
         t0 = time.time()
 
@@ -183,11 +194,6 @@ class TD3Agent(BaseAgent):
         np.save((results_path/"results.npy").absolute().as_posix(), self.evaluations)
         self.save(model_save_path)
         self._plot_results(results_path)
-
-      #if t % eval_freq * 10 == 0:
-      #  self._save_as_gif(
-      #    env=env,
-      #    save_path=(results_path / f"videos/gif_epoch{t}").absolute().as_posix())
 
   def _optimize(self, batch_size):
     self.total_iter += 1

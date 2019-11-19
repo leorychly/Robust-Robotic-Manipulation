@@ -20,7 +20,7 @@ from src.executer.base_executer import BaseExecuter
 from src.executer.noise_executer import NoiseExecuter
 from src.executer.shift_executer import ShiftExecuter
 
-from experiments.train_agent import train_td3_agent
+from experiments.train_agent import train_td3_agent, train_td3mb_agent
 from experiments.eval_agent import eval_td3_agent
 from experiments.test_agent import test_td3_agent
 

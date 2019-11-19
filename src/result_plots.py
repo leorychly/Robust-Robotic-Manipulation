@@ -46,5 +46,37 @@ def observation_shift():
   plt.show()
 
 
-observation_noise()
-observation_shift()
+def action_noise():
+  x = [0, 0.0001, 0.0002, 0.0004, 0.0006, 0.0008,
+       0.001, 0.002, 0.004, 0.006, 0.008,
+       0.01, 0.02, 0.04, 0.06, 0.08,
+       0.1, 0.2, 0.4, 0.6, 0.8, 1]
+
+  y_max = [9343, 9343, 9343, 9343, 9343, 9343, 9343, 9343, 9343, 9343, 9343, 9343, 9343, 9343,
+           9344, 9344, 9344, 9347, 9353,  7600, 1877, 827]
+  y_9k = [9275, 9275, 9275, 9275, 9275, 9275, 9275, 9275, 9275, 9275, 9275, 9275, 9275, 9275, 9275 , 9275,
+          9276, 9208, 9046, 9025, 1753, 918]
+  y_a256_c512 = [9118, 9118, 9118, 9118, 9118, 9118, 9118, 9118, 9118, 9118, 9118, 9118, 9118,
+                 9119, 9117, 9118, 9119, 8822, 8812, 6624, 2270, 927]
+  y_a512_c256 = [9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355,
+                 9285, 8722, 7436, 1836, 781]
+
+  plt.plot(x, y_max, 'red')
+  plt.plot(x, y_9k, 'orange')
+  plt.plot(x, y_a256_c512, "magenta")
+  plt.plot(x, y_a512_c256, "teal")
+
+  plt.title("TD3 Robustness vs Action Noise\n(2 Layer Actor Critic)")
+  plt.xlabel("Noise Variance")
+  plt.ylabel("Total Reward over 1000 Steps")
+  # plt.xticks(x)
+  # plt.xscale("log")
+  # plt.xlim([0, 0.2])
+  plt.grid()
+  plt.show()
+
+
+
+#observation_noise()
+#observation_shift()
+action_noise()

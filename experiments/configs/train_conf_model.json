@@ -1,0 +1,46 @@
+{
+  "seed": 42,
+  "agent": "TD3",
+  "observer": "BaseObserver(observation_space=env.observation_space)",
+  "executer": "BaseExecuter(action_space=env.action_space)",
+  "environment": "InvertedDoublePendulumMuJoCoEnv-v0",
+  "buffer_size": 1000000,
+  "train_steps": 500000,
+  "initial_steps": 10000,
+  "batch_size": 128,
+  "eval_steps": 10,
+  "actor_layer": [
+      {"type": "linear", "n_neurons": [0, 256]},
+      {"type": "relu"},
+      {"type": "linear", "n_neurons": [256, 256]},
+      {"type": "relu"},
+      {"type": "linear", "n_neurons": [256, 0]},
+      {"type": "tanh"}
+    ],
+  "critic_layer": [
+    {"type": "linear", "n_neurons": [0, 256]},
+    {"type": "relu"},
+    {"type": "linear", "n_neurons": [256, 256]},
+    {"type": "relu"},
+    {"type": "linear", "n_neurons": [256, 1]}
+  ],
+  "actor_lr": 8e-5,
+  "critic_lr": 8e-5,
+  "discount": 0.99,
+  "tau": 0.005,
+  "policy_noise": 0.2,
+  "noise_clip": 0.5,
+  "policy_freq": 2,
+  "expl_noise": 0.1,
+  "model_layer": [
+      {"type": "linear", "n_neurons": [0, 512]},
+      {"type": "relu"},
+      {"type": "linear", "n_neurons": [512, 512]},
+      {"type": "relu"},
+      {"type": "linear", "n_neurons": [512, 0]},
+      {"type": "relu"}
+    ],
+  "model_lr": 1e-4,
+  "model_batch_size": 16,
+  "model_replay_buffer_size": 100000
+}
