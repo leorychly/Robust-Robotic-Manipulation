@@ -37,7 +37,8 @@ def run_td3(env, args, config):
   param_path = Path(args.directory) / "params"
   param_path.mkdir(parents=True, exist_ok=True)
 
-  with open(str(param_path / f"param_{args.mode}.json"), "w") as jsn:
+  fname = "train" if args.mode == "train_mb" else args.mode
+  with open(str(param_path / f"param_{fname}.json"), "w") as jsn:
     json.dump({
       "experiment_args": vars(args),
       "experiment_config": config,
@@ -45,6 +46,12 @@ def run_td3(env, args, config):
 
   if args.mode == "train":
     train_td3_agent(env=env,
+                    model_path=model_path,
+                    results_path=results_path,
+                    **config)
+
+  elif args.mode == "train_mb":
+    train_td3mb_agent(env=env,
                     model_path=model_path,
                     results_path=results_path,
                     **config)
@@ -62,6 +69,7 @@ def run_td3(env, args, config):
                    model_path=model_path,
                    param_path=param_path,
                    eval_ep=config["eval_episodes"],
+                   use_model=config["use_model"],
                    seed=config["seed"])
 
   else:

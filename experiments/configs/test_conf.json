@@ -4,22 +4,11 @@
   "environment": "InvertedDoublePendulumMuJoCoEnv-v0",
   "eval_episodes": 100,
   "configurations": [
-    ["ShiftObserver(observation_space=env.observation_space, shift_scale=-0.1)", "BaseExecuter(action_space=env.action_space)"],
-    ["ShiftObserver(observation_space=env.observation_space, shift_scale=-0.05)", "BaseExecuter(action_space=env.action_space)"],
-    ["ShiftObserver(observation_space=env.observation_space, shift_scale=-0.01)", "BaseExecuter(action_space=env.action_space)"],
-    ["ShiftObserver(observation_space=env.observation_space, shift_scale=-0.005)", "BaseExecuter(action_space=env.action_space)"],
-    ["ShiftObserver(observation_space=env.observation_space, shift_scale=-0.001)", "BaseExecuter(action_space=env.action_space)"],
-    ["ShiftObserver(observation_space=env.observation_space, shift_scale=-0.0005)", "BaseExecuter(action_space=env.action_space)"],
-    ["ShiftObserver(observation_space=env.observation_space, shift_scale=-0.0001)", "BaseExecuter(action_space=env.action_space)"],
-    ["BaseObserver(observation_space=env.observation_space)", "BaseExecuter(action_space=env.action_space)"],
-    ["ShiftObserver(observation_space=env.observation_space, shift_scale=0.0001)", "BaseExecuter(action_space=env.action_space)"],
-    ["ShiftObserver(observation_space=env.observation_space, shift_scale=0.0005)", "BaseExecuter(action_space=env.action_space)"],
-    ["ShiftObserver(observation_space=env.observation_space, shift_scale=0.001)", "BaseExecuter(action_space=env.action_space)"],
-    ["ShiftObserver(observation_space=env.observation_space, shift_scale=0.005)", "BaseExecuter(action_space=env.action_space)"],
-    ["ShiftObserver(observation_space=env.observation_space, shift_scale=0.01)", "BaseExecuter(action_space=env.action_space)"],
-    ["ShiftObserver(observation_space=env.observation_space, shift_scale=0.05)", "BaseExecuter(action_space=env.action_space)"],
-    ["ShiftObserver(observation_space=env.observation_space, shift_scale=0.1)", "BaseExecuter(action_space=env.action_space)"]
-  ]
+    [
+      "ShiftObserver(observation_space=env.observation_space, shift_scale=0.01)",
+      "NoiseExecuter(action_space=env.action_space, noise_scale=0.5)"]
+  ],
+  "use_model": 1
 }
 
 

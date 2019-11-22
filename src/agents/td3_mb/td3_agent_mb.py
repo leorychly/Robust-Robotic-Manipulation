@@ -6,12 +6,10 @@ from absl import logging
 from gym import wrappers
 import torch
 import torch.nn.functional as F
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"\nRunning computation on: '{device}'\n")
 
 from src.agents.base_agent import BaseAgent
 from src.agents.td3.td3_utils import Actor, Critic, ReplayBuffer
-from src.agents.td3.ann import ANN
+from src.agents.td3_mb.ann import ANN
 
 
 class TD3AgentMB(BaseAgent):
@@ -33,6 +31,8 @@ class TD3AgentMB(BaseAgent):
     model_layer,
     model_lr,
     model_replay_buffer_size,
+    device,
+    use_model=False,
     **unused_kwargs):
 
     state_dim = env.observation_space.shape[0]
@@ -48,21 +48,22 @@ class TD3AgentMB(BaseAgent):
 
     self.replay_buffer = ReplayBuffer(state_dim, action_dim, max_size=buffer_size)
 
-    self.actor = Actor(state_dim, action_dim, max_action, actor_layer)  # .to(device)
+    self.actor = Actor(state_dim, action_dim, max_action, actor_layer)
     self.actor = self.actor.to(device)
     self.actor_target = copy.deepcopy(self.actor)
     self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), lr=actor_lr)
 
-    self.critic = Critic(state_dim, action_dim, critic_layer)  # .to(device)
+    self.critic = Critic(state_dim, action_dim, critic_layer)
     self.critic = self.critic.to(device)
     self.critic_target = copy.deepcopy(self.critic)
     self.critic_optimizer = torch.optim.Adam(self.critic.parameters(), lr=critic_lr)
 
-    self.env_model = ANN(state_dim=state_dim,
-                         action_dim=action_dim,
-                         model_layer=model_layer,
-                         model_replay_buffer_size=model_replay_buffer_size,
-                         lr=model_lr)
+    self.env_model = ANN(input_dim=state_dim + action_dim,
+                         output_dim=state_dim,
+                         model_param=model_layer,
+                         lr=model_lr,
+                         buffer_size=model_replay_buffer_size,
+                         device=device)
     self.env_model = self.env_model.to(device)
 
     self.action_dim = action_dim
@@ -72,18 +73,44 @@ class TD3AgentMB(BaseAgent):
     self.policy_noise = policy_noise
     self.noise_clip = noise_clip
     self.policy_freq = policy_freq
+    self.use_model = use_model
+    self.device = device
 
     self.total_iter = 0
-    self.evaluations = []
+    self.evaluations_agent = []
+    self.evaluations_model = []
+    self.model_pred_errors = []
 
   # TODO: is selec_action == BaseAgent.plan? How to train?
 
-  def plan(self, state):
-    state = torch.FloatTensor(state.reshape(1, -1))  # .to(device)
-    state = state.to(device)
-    action = self.actor(state).cpu().data.numpy().flatten()
+  def plan(self, obs, prev_obs=None, prev_action=None):
+    obs = torch.FloatTensor(obs.reshape(1, -1))
+    obs = obs.to(self.device)
+    prev_obs = torch.FloatTensor(prev_obs)
+    prev_obs = prev_obs.to(self.device)
+    prev_action = torch.FloatTensor(prev_action)
+    prev_action = prev_action.to(self.device)
+    pred_error = -1
+    if self.use_model:
+      obs, pred_error = self._correct_observation(obs=obs,
+                                                  prev_obs=prev_obs,
+                                                  prev_action=prev_action)
+    action = self.actor(obs).cpu().data.numpy().flatten()
     control_action = self.executer(action)
-    return control_action
+    return control_action, pred_error
+
+  def _correct_observation(self, obs, prev_obs, prev_action):
+    THRESH_PCT = 0.2
+    obs_pred = self.env_model(torch.cat((prev_obs, prev_action)))
+    obs_pred = obs_pred.reshape(1, -1)
+
+    obs_delta = torch.abs(obs - obs_pred)
+    pred_error = torch.mean((obs - obs_pred)**2).detach().cpu().numpy()
+    mask_lst = obs_delta.detach().cpu().numpy() > obs_pred.detach().cpu().numpy() * THRESH_PCT
+    mask = torch.BoolTensor(mask_lst)
+    mask = mask.to(self.device)
+    obs.masked_scatter_(mask, obs_pred[mask])
+    return obs.to(self.device), pred_error
 
   def eval_policy_on_env(self, eval_gym_env, eval_episodes=10, seed=None):
     """Uses the observer and executer."""
@@ -95,11 +122,17 @@ class TD3AgentMB(BaseAgent):
     for i in range(eval_episodes):
       state, done = eval_gym_env.reset(), False
       obs = self.observer(state)
+      prev_action = eval_gym_env.action_space.sample()
+      prev_obs = obs
       step = 0
       #while not done and step < max_steps:
       while not done:
-        action = self.plan(np.array(obs))
+        action, pred_error = self.plan(obs=np.array(obs),
+                                       prev_obs=prev_obs,
+                                       prev_action=prev_action)
         state, reward, done, _ = eval_gym_env.step(action)
+        prev_action = action
+        prev_obs = obs
         obs = self.observer(state)
         avg_reward += reward
         step += 1
@@ -122,16 +155,19 @@ class TD3AgentMB(BaseAgent):
     results_path.mkdir(parents=True, exist_ok=True)
 
     # Evaluate untrained policy
-    self.evaluations.append(self.eval_policy_on_env(
+    self.evaluations_agent.append(self.eval_policy_on_env(
       eval_gym_env=env,
       eval_episodes=eval_steps))
 
     state, done = env.reset(), False
     obs = self.observer(state)
+    prev_obs = obs
+    prev_action = env.action_space.sample()
     episode_reward = 0
     episode_timesteps = 0
     episode_num = 0
 
+    model_errors = []
     t0 = time.time()
     for t in range(int(train_steps)):
 
@@ -140,11 +176,13 @@ class TD3AgentMB(BaseAgent):
       # Select action randomly
       if t < initial_steps:
         action = env.action_space.sample()
+        model_errors.append(0.)
       # Select next action according to policy
       else:
-        action = (self.plan(np.array(obs))
-                  + np.random.normal(0, self.max_action * expl_noise, size=self.action_dim)
-                 ).clip(-self.max_action, self.max_action)
+        action, pred_error = self.plan(obs=np.array(obs), prev_obs=prev_obs, prev_action=prev_action)
+        model_errors.append(pred_error.flatten())
+        action += np.random.normal(0, self.max_action * expl_noise, size=self.action_dim)
+        action = action.clip(-self.max_action, self.max_action)
 
       # Perform action
       next_state, reward, done, _ = env.step(action)
@@ -155,14 +193,15 @@ class TD3AgentMB(BaseAgent):
       # Store data in replay buffer
       self.replay_buffer.add(obs, action, next_obs, reward, done_bool)
       self.env_model.add_to_buffer(in_val=np.concatenate((obs, action)), out_val=next_obs)
-
+      prev_obs = obs
       obs = next_obs
+      prev_action = action
       episode_reward += reward
 
       # Train agent after collecting data
+      self.env_model.optimize_model(batch_size=model_batch_size)
       if t >= initial_steps:
         self._optimize(batch_size)
-        self.env_model.optimize_model(batch_size=model_batch_size)
 
       if done:
         # +1 to account for 0 indexing. +0 on ep_timesteps since it will increment +1 even if done=True
@@ -181,17 +220,23 @@ class TD3AgentMB(BaseAgent):
       # Evaluate and safe episode
       if t % eval_freq == 0:
         avg_reward = self.eval_policy_on_env(env, eval_episodes=eval_steps)
-        avrg_loss = self.env_model.eval()
+        avrg_loss = self.env_model.eval_model()
 
         logging.info(f"After Iteration {t}, "
-                     f"Evaluation over {eval_steps} episodes, "
-                     f"Avrg Reward: {avg_reward:.3f}, "
-                     f"Avrg Model loss: {avrg_loss}, "
+                     f"Avrg Reward ({eval_steps} ep): {avg_reward:.3f}, "
+                     f"Avrg (abs) Model Prediction Error : {avrg_loss:.4f}, "
                      f"({time.time() - t0:.2f} sec)")
         t0 = time.time()
 
-        self.evaluations.append(avg_reward)
-        np.save((results_path/"results.npy").absolute().as_posix(), self.evaluations)
+        self.evaluations_agent.append(avg_reward)
+        self.evaluations_model.append(avrg_loss)
+        self.model_pred_errors.append(np.array([np.mean(model_errors), np.std(model_errors)]).flatten())
+        model_errors = []
+
+        np.save((results_path/"agent_training.npy").absolute().as_posix(), self.evaluations_agent)
+        np.save((results_path/"model_training.npy").absolute().as_posix(), self.evaluations_model)
+        np.save((results_path/"model_usage_error.npy").absolute().as_posix(), np.array(self.model_pred_errors))
+
         self.save(model_save_path)
         self._plot_results(results_path)
 
@@ -253,6 +298,7 @@ class TD3AgentMB(BaseAgent):
                (file_path / "td3_actor").absolute().as_posix())
     torch.save(self.actor_optimizer.state_dict(),
                (file_path / "td3_actor_optimizer").absolute().as_posix())
+    self.env_model.save(file_path=file_path)
 
   def load(self, file_path):
     file_path.mkdir(parents=True, exist_ok=True)
@@ -264,30 +310,34 @@ class TD3AgentMB(BaseAgent):
       (file_path / "td3_actor").absolute().as_posix()))
     self.actor_optimizer.load_state_dict(torch.load(
       (file_path / "td3_actor_optimizer").absolute().as_posix()))
+    self.env_model.save(file_path=file_path)
 
   def _plot_results(self, file_path):
-    fig, ax = plt.subplots()
-    ax.plot(np.arange(len(self.evaluations)), self.evaluations)
-    ax.set(xlabel="Iterations [1k]", ylabel="Average Reward",
+    fig, ax = plt.subplots(1, 3, figsize=(16, 8))
+    ax[0].plot(np.arange(len(self.evaluations_agent)), self.evaluations_agent)
+    ax[0].set(xlabel="Iterations [1k]", ylabel="Average Reward",
            title="Average Reward of Evaluation during Training")
-    ax.grid()
-    fig.savefig((file_path / "training_reward.png").absolute().as_posix())
+    ax[0].grid()
+
+    ax[1].plot(np.arange(len(self.evaluations_model)), self.evaluations_model)
+    ax[1].set(xlabel="Iterations [1k]", ylabel="L1: Mean Absolute Training Error",
+              title="Average Loss of Training the Env. Model")
+    ax[1].grid()
+
+    error = np.array(self.model_pred_errors)[:, 0]
+    std = np.array(self.model_pred_errors)[:, 1]
+    ax[2].plot(np.arange(len(error)), error)
+    #ax[2].plot(np.arange(len(std)), error+std, "g--", alpha=0.2)
+    #ax[2].plot(np.arange(len(std)), error-std, "g--", alpha=0.2)
+    ax[2].fill_between(np.arange(len(std)), error - std, error + std, color="gray", alpha=0.2)
+    #ax[2].errorbar(x, y + 3, yerr=yerr, label='both limits (default)')
+    ax[2].set(xlabel="Iterations [1k]", ylabel="Average (over 1k Iter.) Absolute Prediction Error",
+              title="Prediction Error when using the Model.")
+    ax[2].grid()
+
+    fig.savefig((file_path / "training_progress.png").absolute().as_posix())
     plt.close()
 
-  def _save_as_gif(self, env, save_path, episodes=1000):
-    # TODO: does not work yet. ffmpeg bug...
-    env = wrappers.Monitor(env, save_path)
-    avg_reward = 0.
-    for i in range(episodes):
-      state, done = env.reset(), False
-      obs = self.observer(state)
-      while not done:
-        action = self.plan(np.array(obs))
-        state, reward, done, _ = env.step(action)
-        obs = self.observer(state)
-        avg_reward += reward
-    avg_reward /= episodes
-    return avg_reward
 
   def get_param(self):
     return {

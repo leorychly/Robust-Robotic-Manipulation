@@ -7,6 +7,7 @@ import gym
 
 from src.utils import read_json, run_agent
 from src.agents.td3.td3_agent import TD3Agent
+from src.agents.td3_mb.td3_agent_mb import TD3AgentMB
 
 from src.observer.base_observer import BaseObserver
 from src.observer.noise_observer import NoiseObserver
@@ -22,6 +23,7 @@ def test_td3_agent(env,
                    param_path,
                    eval_ep,
                    configurations,
+                   use_model=False,
                    seed=False,
                    render_last=False):
   """
@@ -39,6 +41,8 @@ def test_td3_agent(env,
     Number of steps to render the agent acting in the environment.
   """
   print("\n========== START TESTING GENERALIZATION ==========\n")
+  device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+  print(f"\Running computation on: '{device}'\n")
   logging.info(f"The model loaded from '{model_path}'")
 
   train_param = read_json(str(param_path.absolute() / "param_train.json"))
@@ -48,9 +52,11 @@ def test_td3_agent(env,
 
   results = []
   for obs, exe in configurations:
-    agent = TD3Agent(env=env,
+    agent = TD3AgentMB(env=env,
                      observer=eval(obs),
                      executer=eval(exe),
+                     device=device,
+                     use_model=use_model,
                      **train_config)
     agent.load(model_path)
     avg_reward = agent.eval_policy_on_env(eval_gym_env=env, eval_episodes=eval_ep, seed=seed)

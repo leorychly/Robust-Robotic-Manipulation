@@ -26,15 +26,8 @@ data_action_noise = {
   "y_max":       [9343, 9343, 9343, 9343, 9343, 9343, 9343, 9343, 9343, 9343, 9343, 9343, 9343, 9343, 9344, 9344, 9344, 9347, 9353,  7600, 1877, 827],
   "y_9k":        [9275, 9275, 9275, 9275, 9275, 9275, 9275, 9275, 9275, 9275, 9275, 9275, 9275, 9275, 9275 , 9275, 9276, 9208, 9046, 9025, 1753, 918],
   "y_a256_c512": [9118, 9118, 9118, 9118, 9118, 9118, 9118, 9118, 9118, 9118, 9118, 9118, 9118, 9119, 9117, 9118, 9119, 8822, 8812, 6624, 2270, 927],
-  "y_a512_c256": [9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9285, 8722, 7436, 1836, 781]
-}
-### Data
-data_action_shift_old = {
-  "x": [-0.1, -0.05, -0.01, -0.005, -0.001, -0.0005, -0.0001, 0, 0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1],
-  "y_max":       [9350, 9345, 9343, 9343, 9343, 9343, 9343, 9343, 9343, 9343, 9343, 9343, 9343, 9345, 8823],
-  "y_9k":        [8971, 9126, 9212, 9275, 9275, 9275, 9275, 9275, 9275, 9275, 9275, 9275, 9275, 9276, 9207],
-  "y_a256_c512": [9117, 9118, 9118, 9118, 9118, 9118, 9118, 9118, 9118, 9118, 9118, 9118, 9118, 8654, 7118],
-  "y_a512_c256": [9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9354, 9241, 6629]
+  "y_a512_c256": [9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9285, 8722, 7436, 1836, 781],
+  "train_w_obs_shift": [6733, 6721, 6739, 6711, 6763, 6710, 6788, 6766, 6809, 6829, 6744, 6832, 6595, 6834, 6452, 6311, 6358, 6488, 6954, 6481, 2359, 1009]
 }
 data_action_shift = {
   "x": [-1, -0.8, -0.6, -0.4, -0.2, -0.10, -0.08, -0.06, -0.04, -0.02, -0.01, -0.001, 0, 0.001, 0.01, 0.02, 0.04, 0.06, 0.08, 0.10, 0.2, 0.4, 0.6, 0.8, 1.0],
@@ -43,15 +36,46 @@ data_action_shift = {
   "y_a256_c512": [344, 903, 1349, 2055, 8984, 9117, 9117, 9117, 9118, 9118, 9118, 9118, 9118, 9118, 9118, 9117, 8973, 7487, 6862, 7118, 7102, 3301, 1621, 759, 284],
   "y_a512_c256": [317, 734, 1808, 3702, 9160, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9355, 9354, 9354, 9355, 8711, 7784, 6629, 3909, 1734, 875, 536, 274]
 }
+data_td3_trained_w_obs_shift = {
+  "action_noise": {"noise_scale": [0, 0.0001, 0.0002, 0.0004, 0.0006, 0.0008, 0.001, 0.002, 0.004, 0.006, 0.008, 0.01, 0.02, 0.04, 0.06, 0.08, 0.1, 0.2, 0.4, 0.6, 0.8, 1],
+                   "avrg_r":      [6733, 6721, 6739, 6711, 6763, 6710, 6788, 6766, 6809, 6829, 6744, 6832, 6595, 6834, 6452, 6311, 6358, 6488, 6954, 6481, 2359, 1009]},
+  "action_shift": {"sift_scale": [-1,-0.8,-0.6,-0.4,-0.2,-0.1,-0.08,-0.06,-0.04,-0.02,-0.01,-0.008,-0.006,-0.004,-0.002,-0.001,-0.0008,-0.0006,-0.0004,-0.0002,-0.0001,0,0.0001,0.0002,0.0004,0.0006,0.0008,0.001,0.002,0.004,0.006,0.008,0.01,0.02,0.04,0.06,0.08,0.1,0.2,0.4,0.6,0.8,1],
+                   "avrg_r": [338,899,5349,8123,9263,9254,8206,8359,7279,7584,7437,7247,7100,6981,6930,6840,6810,6806,6766,6782,6734,6733,6773,6773,6768,6777,6797,6722,6552,6508,6425,6455,6308,5334,4178,3545,3192,2946,2448,1888,991,508,266]},
+  "obs_noise": {"noise_scale":    [0, 0.0001, 0.0002, 0.0004, 0.0006, 0.0008, 0.001, 0.002, 0.004, 0.006, 0.008, 0.01, 0.02, 0.04, 0.06, 0.08, 0.1, 0.2, 0.4, 0.6, 0.8, 1],
+                "avrg_r": [6733,6841,6785,6739,6746,6633,6443,6681,6542,6576,6803,7054,7725,8461,6895,1861,1175,595,420,379,339,347]},
+  "obs_shift": {"sift_scale":    [-1,-0.8,-0.6,-0.4,-0.2,-0.1,-0.08,-0.06,-0.04,-0.02,-0.01,-0.008,-0.006,-0.004,-0.002,-0.001,-0.0008,-0.0006,-0.0004,-0.0002,-0.0001,0,0.0001,0.0002,0.0004,0.0006,0.0008,0.001,0.002,0.004,0.006,0.008,0.01,0.02,0.04,0.06,0.08,0.1,0.2,0.4,0.6,0.8,1],
+                "avrg_r": [210,265,390,400,390,696,760,825,929,1198,2309,2512,2591,3043,4268,5247,5535,6129,6642,6613,6559,6733,6895,6952,7220,7146,6811,6683,7414,8350,9211,8393,8229,2203,1047,833,721,624,343,321,322,390,423]},
+}
+data_td3_trained_w_a_shift = {
+  "action_noise": {"noise_scale": [0, 0.0001, 0.0002, 0.0004, 0.0006, 0.0008, 0.001, 0.002, 0.004, 0.006, 0.008, 0.01, 0.02, 0.04, 0.06, 0.08, 0.1, 0.2, 0.4, 0.6, 0.8, 1],
+                   "avrg_r_2_2": [9268, 9268, 9268, 9268, 9268, 9268, 9268, 9269, 9269, 9268, 9268, 9269, 9269, 9206, 9269, 9269, 9199, 9123, 9137, 6391, 1408, 736],
+                   "avrg_r_2_3": [9109, 9109, 9109, 9109, 9109, 9109, 9109, 9109, 9109, 9109, 9109, 9109, 9109, 9187, 9187, 9188, 9109, 9190, 9244, 8444, 2589, 1054]},
+  "action_shift": {"sift_scale": [-1,-0.8,-0.6,-0.4,-0.2,-0.1,-0.08,-0.06,-0.04,-0.02,-0.01,-0.008,-0.006,-0.004,-0.002,-0.001,-0.0008,-0.0006,-0.0004,-0.0002,-0.0001,0,0.0001,0.0002,0.0004,0.0006,0.0008,0.001,0.002,0.004,0.006,0.008,0.01,0.02,0.04,0.06,0.08,0.1,0.2,0.4,0.6,0.8,1],
+                   "avrg_r_2_2": [304, 514, 595, 5493, 8104, 8590, 8787, 8981, 9056, 9197, 9201, 9203, 9211, 9268, 9268, 9268, 9268, 9268, 9268, 9268, 9268, 9268, 9268, 9268, 9268, 9268, 9268, 9268, 9268, 9269, 9269, 9268, 9268, 9268, 9268, 9268, 9268, 9268, 9187, 8536, 1513, 549, 286],
+                   "avrg_r_2_3": [367, 853, 2879, 6528, 7677, 8136, 8518, 8898, 8983, 9104, 9107, 9108, 9107, 9108, 9109, 9109, 9109, 9109, 9109, 9109, 9109, 9109, 9109, 9109, 9109, 9109, 9109, 9109, 9109, 9109, 9110, 9110, 9067, 9219, 9189, 8043, 7543, 7289, 7082, 2548, 1300, 539, 270]},
+  "obs_noise": {"noise_scale":    [0, 0.0001, 0.0002, 0.0004, 0.0006, 0.0008, 0.001, 0.002, 0.004, 0.006, 0.008, 0.01, 0.02, 0.04, 0.06, 0.08, 0.1, 0.2, 0.4, 0.6, 0.8, 1],
+                "avrg_r_2_2": [9268, 9268, 9268, 9269, 9268, 9207, 9269, 9269, 9202, 9268, 9207, 9272, 9126, 8631, 3340, 1177, 874, 514, 373, 322, 315, 294],
+                "avrg_r_2_3": [9109, 9109, 9109, 9110, 9110, 9110, 9109, 9187, 9266, 9177, 9267, 9204, 8536, 8482, 4961, 1574, 967, 528, 399, 330, 287, 272]},
+  "obs_shift": {"sift_scale":    [-1,-0.8,-0.6,-0.4,-0.2,-0.1,-0.08,-0.06,-0.04,-0.02,-0.01,-0.008,-0.006,-0.004,-0.002,-0.001,-0.0008,-0.0006,-0.0004,-0.0002,-0.0001,0,0.0001,0.0002,0.0004,0.0006,0.0008,0.001,0.002,0.004,0.006,0.008,0.01,0.02,0.04,0.06,0.08,0.1,0.2,0.4,0.6,0.8,1],
+                "avrg_r_2_2": [157, 177, 208, 252, 459, 620, 702, 806, 957, 1599, 3210, 4102, 6241, 9269, 9267, 9268, 9268, 9268, 9268, 9269, 9269, 9268, 9269, 9269, 9201, 9199, 9197, 9197, 8933, 8381, 8292, 7774, 7094, 3072, 823, 734, 607, 485, 375, 274, 154, 137, 136],
+                "avrg_r_2_3": [138, 158, 365, 205, 332, 505, 593, 730, 885, 1295, 1889, 2161, 2566, 4476, 7526, 8479, 8827, 9160, 9056, 9110, 9109, 9109, 9109, 9108, 9108, 9072, 8933, 8959, 8373, 7783, 7164, 6292, 5558, 1581, 894., 712, 595, 476, 336, 297, 244, 141, 136]},
+}
 
 ### Plot
 fig1, axes1 = plt.subplots(2, 2)
-fig1.suptitle("TD3 Trained with Base Observer and Executer", fontsize=16)
+fig1.suptitle("Teal Colors: TD3 Trained with Base Observer and Executer\n"
+              "Dotted Lines: Trained with variable Observer or Executer", fontsize=16)
 
-axes1[0, 0].plot(data_obs_noise["x"], data_obs_noise["y_max"], 'red')
-axes1[0, 0].plot(data_obs_noise["x"], data_obs_noise["y_9k"], 'orange')
-axes1[0, 0].plot(data_obs_noise["x"], data_obs_noise["y_a256_c512"], 'blue')
-axes1[0, 0].plot(data_obs_noise["x"], data_obs_noise["y_a512_c256"], 'teal')
+axes1[0, 0].plot(data_obs_noise["x"], data_obs_noise["y_max"], c=[0, 0.1, 1], alpha=0.4)
+axes1[0, 0].plot(data_obs_noise["x"], data_obs_noise["y_9k"], c=[0, 0.4, 0.8], alpha=0.4)
+axes1[0, 0].plot(data_obs_noise["x"], data_obs_noise["y_a256_c512"], c=[0, 0.6, 0.6], alpha=0.4)
+axes1[0, 0].plot(data_obs_noise["x"], data_obs_noise["y_a512_c256"], c=[0, 0.8, 0.4], alpha=0.4)
+axes1[0, 0].plot(data_td3_trained_w_obs_shift["obs_noise"]["noise_scale"],
+                 data_td3_trained_w_obs_shift["obs_noise"]["avrg_r"], 'k--', alpha=0.2)
+axes1[0, 0].plot(data_td3_trained_w_a_shift["obs_noise"]["noise_scale"],
+                 data_td3_trained_w_a_shift["obs_noise"]["avrg_r_2_2"], 'r--', alpha=0.2)
+axes1[0, 0].plot(data_td3_trained_w_a_shift["obs_noise"]["noise_scale"],
+                 data_td3_trained_w_a_shift["obs_noise"]["avrg_r_2_3"], 'r--', alpha=0.2)
 axes1[0, 0].set_title("Observation Noise")
 axes1[0, 0].set_xlabel("Noise Variance")
 axes1[0, 0].set_ylabel("Reward over 1000 Steps (Averaged over 100 Episodes)")
@@ -59,21 +83,33 @@ axes1[0, 0].set_xlim([0, 1])
 axes1[0, 0].set_ylim([0, 9500])
 axes1[0, 0].grid()
 
-axes1[1, 0].plot(data_obs_shift["x"], data_obs_shift["y_max"], 'red')
-axes1[1, 0].plot(data_obs_shift["x"], data_obs_shift["y_9k"], 'orange')
-axes1[1, 0].plot(data_obs_shift["x"], data_obs_shift["y_a256_c512"], 'blue')
-axes1[1, 0].plot(data_obs_shift["x"], data_obs_shift["y_a512_c256"], 'teal')
+axes1[1, 0].plot(data_obs_shift["x"], data_obs_shift["y_max"], c=[0, 0.1, 1], alpha=0.4)
+axes1[1, 0].plot(data_obs_shift["x"], data_obs_shift["y_9k"], c=[0, 0.4, 0.8], alpha=0.4)
+axes1[1, 0].plot(data_obs_shift["x"], data_obs_shift["y_a256_c512"], c=[0, 0.6, 0.6], alpha=0.4)
+axes1[1, 0].plot(data_obs_shift["x"], data_obs_shift["y_a512_c256"], c=[0, 0.8, 0.4], alpha=0.4)
+axes1[1, 0].plot(data_td3_trained_w_obs_shift["obs_shift"]["sift_scale"],
+                 data_td3_trained_w_obs_shift["obs_shift"]["avrg_r"], 'k--')
+axes1[1, 0].plot(data_td3_trained_w_a_shift["obs_shift"]["sift_scale"],
+                 data_td3_trained_w_a_shift["obs_shift"]["avrg_r_2_2"], 'r--', alpha=0.2)
+axes1[1, 0].plot(data_td3_trained_w_a_shift["obs_shift"]["sift_scale"],
+                 data_td3_trained_w_a_shift["obs_shift"]["avrg_r_2_3"], 'r--', alpha=0.2)
 axes1[1, 0].set_title("Observation Shift")
 axes1[1, 0].set_xlabel("Absolute Shift Distance")
 axes1[1, 0].set_ylabel("Reward over 1000 Steps (Averaged over 100 Episodes)")
-axes1[1, 0].set_xlim([-0.75, 0.75])
+axes1[1, 0].set_xlim([-0.1, 0.1])
 axes1[1, 0].set_ylim([0, 9500])
 axes1[1, 0].grid()
 
-axes1[0, 1].plot(data_action_noise["x"], data_action_noise["y_max"], 'red')
-axes1[0, 1].plot(data_action_noise["x"], data_action_noise["y_9k"], 'orange')
-axes1[0, 1].plot(data_action_noise["x"], data_action_noise["y_a256_c512"], 'blue')
-axes1[0, 1].plot(data_action_noise["x"], data_action_noise["y_a512_c256"], 'teal')
+axes1[0, 1].plot(data_action_noise["x"], data_action_noise["y_max"], c=[0, 0.1, 1], alpha=0.4)
+axes1[0, 1].plot(data_action_noise["x"], data_action_noise["y_9k"], c=[0, 0.4, 0.8], alpha=0.4)
+axes1[0, 1].plot(data_action_noise["x"], data_action_noise["y_a256_c512"], c=[0, 0.6, 0.6], alpha=0.4)
+axes1[0, 1].plot(data_action_noise["x"], data_action_noise["y_a512_c256"], c=[0, 0.8, 0.4], alpha=0.4)
+axes1[0, 1].plot(data_td3_trained_w_obs_shift["action_noise"]["noise_scale"],
+                 data_td3_trained_w_obs_shift["action_noise"]["avrg_r"], 'k--', alpha=0.2)
+axes1[0, 1].plot(data_td3_trained_w_a_shift["action_noise"]["noise_scale"],
+                 data_td3_trained_w_a_shift["action_noise"]["avrg_r_2_2"], 'r--', alpha=0.2)
+axes1[0, 1].plot(data_td3_trained_w_a_shift["action_noise"]["noise_scale"],
+                 data_td3_trained_w_a_shift["action_noise"]["avrg_r_2_3"], 'r--', alpha=0.2)
 axes1[0, 1].set_title("Action Noise")
 axes1[0, 1].set_xlabel("Noise Variance")
 axes1[0, 1].set_ylabel("Reward over 1000 Steps (Averaged over 100 Episodes)")
@@ -81,15 +117,29 @@ axes1[0, 1].set_xlim([0, 1])
 axes1[0, 1].set_ylim([0, 9500])
 axes1[0, 1].grid()
 
-axes1[1, 1].plot(data_action_shift["x"], data_action_shift["y_max"], 'red')
-axes1[1, 1].plot(data_action_shift["x"], data_action_shift["y_9k"], 'orange')
-axes1[1, 1].plot(data_action_shift["x"], data_action_shift["y_a256_c512"], 'blue')
-axes1[1, 1].plot(data_action_shift["x"], data_action_shift["y_a512_c256"], 'teal')
+axes1[1, 1].plot(data_action_shift["x"], data_action_shift["y_max"], c=[0, 0.1, 1], alpha=0.4)
+axes1[1, 1].plot(data_action_shift["x"], data_action_shift["y_9k"], c=[0, 0.4, 0.8], alpha=0.4)
+axes1[1, 1].plot(data_action_shift["x"], data_action_shift["y_a256_c512"], c=[0, 0.6, 0.6], alpha=0.4)
+axes1[1, 1].plot(data_action_shift["x"], data_action_shift["y_a512_c256"], c=[0, 0.8, 0.4], alpha=0.4)
+axes1[1, 1].plot(data_td3_trained_w_obs_shift["action_shift"]["sift_scale"],
+                 data_td3_trained_w_obs_shift["action_shift"]["avrg_r"], 'k--', alpha=0.2)
+axes1[1, 1].plot(data_td3_trained_w_a_shift["action_shift"]["sift_scale"],
+                 data_td3_trained_w_a_shift["action_shift"]["avrg_r_2_2"], 'r--', alpha=1)
+axes1[1, 1].plot(data_td3_trained_w_a_shift["action_shift"]["sift_scale"],
+                 data_td3_trained_w_a_shift["action_shift"]["avrg_r_2_3"], 'r--', alpha=1)
 axes1[1, 1].set_title("Action Shift")
 axes1[1, 1].set_xlabel("Absolute Shift Distance")
 axes1[1, 1].set_ylabel("Reward over 1000 Steps (Averaged over 100 Episodes)")
-axes1[1, 1].set_xlim([-0.75, 0.75])
+axes1[1, 1].set_xlim([-1, 1])
 axes1[1, 1].set_ylim([0, 9500])
 axes1[1, 1].grid()
 
 plt.show()
+
+
+
+
+
+
+
+

@@ -6,13 +6,13 @@ import torch.nn.functional as F
 
 class ReplayBuffer(object):
 
-  def __init__(self, input_dim, output_dim, max_size=1e6):
+  def __init__(self, input_dim, output_dim, max_size, device):
     self.max_size = int(max_size)
     self.ptr = 0
     self.size = 0
-    self.in_val = np.zeros((max_size, input_dim))
-    self.out_val = np.zeros((max_size, output_dim))
-    self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    self.in_val = np.zeros((int(max_size), int(input_dim)))
+    self.out_val = np.zeros((int(max_size), int(output_dim)))
+    self.device = device  # torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
   def add(self, in_val, out_val):
     self.in_val[self.ptr] = in_val

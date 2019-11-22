@@ -10,8 +10,6 @@ from absl import logging
 from gym import wrappers
 import torch
 import torch.nn.functional as F
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"\nRunning computation on: '{device}'\n")
 
 from src.agents.base_agent import BaseAgent
 from src.agents.td3.td3_utils import Actor, Critic, ReplayBuffer
@@ -33,6 +31,7 @@ class TD3Agent(BaseAgent):
     policy_noise,  # =0.2,
     noise_clip,  # =0.5,
     policy_freq,
+    device,
     **unused_kwargs):  # =2):
 
     state_dim = env.observation_space.shape[0]
@@ -67,6 +66,7 @@ class TD3Agent(BaseAgent):
     self.policy_noise = policy_noise
     self.noise_clip = noise_clip
     self.policy_freq = policy_freq
+    self.device=device
 
     self.total_iter = 0
     self.evaluations = []
@@ -74,8 +74,8 @@ class TD3Agent(BaseAgent):
   # TODO: is selec_action == BaseAgent.plan? How to train?
 
   def plan(self, state):
-    state = torch.FloatTensor(state.reshape(1, -1))  # .to(device)
-    state = state.to(device)
+    state = torch.FloatTensor(state.reshape(1, -1))
+    state = state.to(self.device)
     action = self.actor(state).cpu().data.numpy().flatten()
     control_action = self.executer(action)
     return control_action
@@ -191,28 +191,24 @@ class TD3Agent(BaseAgent):
 
   def _optimize(self, batch_size):
     self.total_iter += 1
-
-    # Sample replay buffer
     state, action, next_state, reward, not_done = self.replay_buffer.sample(batch_size)
 
     with torch.no_grad():
-      # Select action according to policy and add clipped noise
       noise = (torch.randn_like(action) * self.policy_noise).clamp(
         -self.noise_clip, self.noise_clip)
-
       next_action = (self.actor_target(next_state) + noise).clamp(
         -self.max_action, self.max_action)
 
-      # Compute the target Q value
-      target_Q1, target_Q2 = self.critic_target(next_state, next_action)
-      target_Q = torch.min(target_Q1, target_Q2)
-      target_Q = reward + not_done * self.discount * target_Q
+      # Compute target Q value
+      target_q1, target_q2 = self.critic_target(next_state, next_action)
+      target_q = torch.min(target_q1, target_q2)
+      target_q = reward + not_done * self.discount * target_q
 
     # Get current Q estimates
-    current_Q1, current_Q2 = self.critic(state, action)
+    current_q1, current_q2 = self.critic(state, action)
 
     # Compute critic loss
-    critic_loss = F.mse_loss(current_Q1, target_Q) + F.mse_loss(current_Q2, target_Q)
+    critic_loss = F.mse_loss(current_q1, target_q) + F.mse_loss(current_q2, target_q)
 
     # Optimize the critic
     self.critic_optimizer.zero_grad()

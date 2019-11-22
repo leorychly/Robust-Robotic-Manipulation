@@ -1,5 +1,6 @@
 import time
 import gym
+import torch
 from absl import logging
 
 from src.utils import read_json, run_agent
@@ -34,6 +35,9 @@ def eval_td3_agent(env,
     Number of steps to render the agent acting in the environment.
   """
   print("\n========== START EVALUATION ==========\n")
+  device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+  print(f"\Running computation on: '{device}'\n")
+
   param = read_json(str(param_path.absolute() / "param_train.json"))
   config = param["experiment_config"]
 
@@ -43,6 +47,7 @@ def eval_td3_agent(env,
   agent = TD3Agent(env=env,
                    observer=eval(observer)(observation_space=env.observation_space),
                    executer=eval(executer)(action_space=env.action_space),
+                   device=device,
                    **config)
 
   agent.load(model_path)

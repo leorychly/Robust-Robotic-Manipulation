@@ -29,13 +29,17 @@ class BaseAgent(metaclass=ABCMeta):
     return obs
 
   @abstractmethod
-  def plan(self, obs):
+  def plan(self, obs, prev_obs=None, prev_action=None):
     """
     Choose a next action given a observation of the environment.
 
     :param obs:
       A observation of the environment at the current time step.
       The observation is an altered stated produced by the observer.
+    :param prev_obs:
+      The observation of the environment at the previous time step.
+    :param prev_oactions:
+      The observation of the environment at the previous time step.
 
     :return action:
       Next action to be executed by the agent.

@@ -1,26 +1,8 @@
-import copy
 import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
-
-def create_nn_layer(layer_def):
-  """
-  Create a PyTorch layer given a definition file.
-
-  :param layer_def: dict
-    Dictionary containing the layer definition.
-
-  :return pytorch.nn.module:
-    Return the corresponding PyTorch layer module.
-  """
-  if layer_def["type"] == "linear":
-    return nn.Linear(layer_def["n_neurons"][0], layer_def["n_neurons"][1])
-  elif layer_def["type"] == "relu":
-    return nn.ReLU()
-  elif layer_def["type"] == "tanh":
-    return nn.Tanh()
+from src.agents.agent_commons import create_nn_layer
 
 
 class Actor(nn.Module):

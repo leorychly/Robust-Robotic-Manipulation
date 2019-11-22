@@ -1,8 +1,5 @@
-import json
 from absl import logging
-
-from src.agents.td3.td3_agent import TD3Agent
-from src.agents.td3.td3_agent_mb import TD3AgentMB
+import torch
 
 from src.observer.base_observer import BaseObserver
 from src.observer.noise_observer import NoiseObserver
@@ -12,6 +9,9 @@ from src.executer.base_executer import BaseExecuter
 from src.executer.noise_executer import NoiseExecuter
 from src.executer.shift_executer import ShiftExecuter
 
+from src.agents.td3.td3_agent import TD3Agent
+from src.agents.td3_mb.td3_agent_mb import TD3AgentMB
+
 
 def train_td3_agent(env,
                     model_path,
@@ -20,6 +20,8 @@ def train_td3_agent(env,
                     executer,
                     **kwargs):
   print("\n========== START TRAINING TD3 (w/o Model) ==========\n")
+  device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+  print(f"\Running computation on: '{device}'\n")
 
   agent = TD3Agent(env=env,
                    actor_layer=kwargs["actor_layer"],
@@ -33,7 +35,8 @@ def train_td3_agent(env,
                    tau=kwargs["tau"],
                    policy_noise=kwargs["policy_noise"],
                    noise_clip=kwargs["noise_clip"],
-                   policy_freq=kwargs["policy_freq"])
+                   policy_freq=kwargs["policy_freq"],
+                   device=device)
 
   try:
     agent.load(model_path)
@@ -58,6 +61,8 @@ def train_td3mb_agent(env,
                       executer,
                       **kwargs):
   print("\n========== START TRAINING TD3 (with Model) ==========\n")
+  device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+  print(f"\Running computation on: '{device}'\n")
 
   agent = TD3AgentMB(env=env,
                      actor_layer=kwargs["actor_layer"],
@@ -74,7 +79,9 @@ def train_td3mb_agent(env,
                      policy_freq=kwargs["policy_freq"],
                      model_layer=kwargs["model_layer"],
                      model_lr=kwargs["model_lr"],
-                     model_replay_buffer_size=kwargs["model_replay_buffer_size"])
+                     model_replay_buffer_size=kwargs["model_replay_buffer_size"],
+                     use_model=True,
+                     device=device)
 
   try:
     agent.load(model_path)
