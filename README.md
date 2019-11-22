@@ -43,7 +43,7 @@ bash run_experiment_train.sh
 
 ### Project Overview
 #### Agents
-* __TD3__: (successor of DDPG) a state of the art model-free reinforcement learning algorithm for continuous control problems.
+* __[TD3](https://arxiv.org/pdf/1802.09477.pdf)__: (successor of DDPG) a state of the art model-free reinforcement learning algorithm for continuous control problems.
  The TD3 focuses on reducing the overestimation bias seen from the DDPG and similar algorithms by:
     * Using a pair of critic networks
     * Delayed updates of the actor
